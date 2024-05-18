@@ -12,3 +12,6 @@ charts/**/charts/
 
 # Compose filesystem
 /docker
+
+/config/mysql
+.env

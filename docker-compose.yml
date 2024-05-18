@@ -1,44 +1,56 @@
 version: '3.7'
 
 services:
-  server:
-    image: nginx
-    container_name: invoiceninja_server
-    restart: always
-    env_file: stack.env
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    container_name: invoiceninja-nginx
     volumes:
       - ./config/nginx/in-vhost.conf:/etc/nginx/conf.d/in-vhost.conf:ro
-      - ./docker/app/public:/var/www/app/public:ro
+      - invoiceninja-public:/var/www/app/public:ro
     depends_on:
-      - app
+      - invoiceninja
     networks:
       - invoiceninja
       - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.invoiceninja.rule=host(`ininja.soarelly.com`)"
+      - "traefik.http.routers.invoiceninja.entrypoints=websecure"
+      - "traefik.http.routers.invoiceninja.tls=true"
+      - "traefik.http.routers.invoiceninja.tls.domains[0].main=soarelly.com"
+      - "traefik.http.routers.invoiceninja.tls.domains[0].sans=*.soarelly.com"
+      - "traefik.http.routers.invoiceninja.tls.certresolver=godaddy"
+      - "traefik.http.routers.invoiceninja.middlewares=oauth"
 
-  app:
-    image: invoiceninja/invoiceninja:5
-    env_file: env
-    container_name: invoiceninja_app
-    restart: always
+  invoiceninja:
+    image: invoiceninja/invoiceninja:5.8
+    container_name: invoiceninja
+    restart: unless-stopped
     volumes:
-      - ./docker/app/public:/var/www/app/public:rw,delegated
-      - ./docker/app/storage:/var/www/app/storage:rw,delegated
-      - ./config/php/php.ini:/usr/local/etc/php/php.ini:ro
-      - ./config/php/php-cli.ini:/usr/local/etc/php/php-cli.ini:ro
+      - invoiceninja-public:/var/www/app/public:rw,delegated
+      - invoiceninja-storage:/var/www/app/storage:rw,delegated
     depends_on:
-      - db
+      - mariadb
+    env_file:
+      - .env
     networks:
       - invoiceninja
 
-  db:
-    image: mysql:8
-    container_name: invoiceninja_db
-    restart: always
-    env_file: stack.env
+  mariadb:
+    image: linuxserver/mariadb:10.6.10
+    container_name: invoiceninja-mariadb
+    restart: unless-stopped
+    env_file:
+      - .env
     volumes:
-      - ./docker/mysql/data:/var/lib/mysql:rw,delegated
+      - ./config/mysql:/config
     networks:
       - invoiceninja
+
+volumes:
+  invoiceninja-public:
+  invoiceninja-storage:
 
 
 networks:

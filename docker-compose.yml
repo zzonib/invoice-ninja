@@ -15,12 +15,12 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.invoiceninja.rule=host(`ininja.soarelly.com`)"
+      - "traefik.http.routers.invoiceninja.rule=host(`ininja.jsoares.cc`)"
       - "traefik.http.routers.invoiceninja.entrypoints=websecure"
       - "traefik.http.routers.invoiceninja.tls=true"
-      - "traefik.http.routers.invoiceninja.tls.domains[0].main=soarelly.com"
-      - "traefik.http.routers.invoiceninja.tls.domains[0].sans=*.soarelly.com"
-      - "traefik.http.routers.invoiceninja.tls.certresolver=godaddy"
+      - "traefik.http.routers.invoiceninja.tls.domains[0].main=jsoares.cc"
+      - "traefik.http.routers.invoiceninja.tls.domains[0].sans=*.jsoares.cc"
+      - "traefik.http.routers.invoiceninja.tls.certresolver=cloudflare"
       - "traefik.http.routers.invoiceninja.middlewares=oauth"
 
   invoiceninja:
